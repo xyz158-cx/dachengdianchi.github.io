@@ -1,2 +1,515 @@
-<a>薛奕智制作的网站<a>
-<b>后续会添加更多<b>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智能地图导航系统</title>
+    <style>
+        /* 基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        /* 头部样式 */
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        
+        nav li {
+            margin: 0 1rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+        }
+        
+        nav a:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* 主要内容区域 */
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        section#home, section#prices {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: none; /* 默认隐藏所有内容区域 */
+        }
+        
+        section.active {
+            display: block !important; /* 强制显示当前激活的内容区域 */
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+        
+        /* 地图容器样式 */
+        #map-container {
+            width: 100%;
+            height: 500px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            margin: 2rem 0;
+            border: 3px solid #e1e8ed;
+            transition: transform 0.3s ease;
+        }
+        
+        #map-container:hover {
+            transform: scale(1.02);
+        }
+        
+        /* 地图控制面板 */
+        .map-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        .control-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+        
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .location-info {
+            background: rgba(255,255,255,0.9);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* 价格页面样式 */
+        .price-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .battery-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            padding: 1.5rem;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .battery-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .battery-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .battery-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        
+        .battery-specs {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        /* 页脚样式 */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            background: rgba(255,255,255,0.8);
+            margin-top: 2rem;
+            border-radius: 15px 15px 0 0;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav li {
+                margin: 0.2rem 0;
+            }
+            
+            section#home, section#prices {
+                padding: 1rem;
+                margin: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            #map-container {
+                height: 300px;
+            }
+            
+            .map-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .price-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animated {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        /* 确保动画结束后内容仍然可见 */
+        .animated.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <!-- 导航栏 -->
+            <ul>
+                <li><a href="#" onclick="showSection('home')">首页</a></li>
+                <li><a href="#about">关于</a></li>
+                <li><a href="#contact">联系</a></li>
+                <li><a href="#map">地图</a></li>
+                <li><a href="#" onclick="showSection('prices')">价格</a></li> <!-- 新增价格标签 -->
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="home" class="animated">
+            <h1>🗺️ 大成电池</h1>
+            <p class="subtitle">--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------</p>
+            
+            <div class="map-controls">
+                <div class="control-group">
+                    <button class="control-btn" onclick="centerMap()">居中定位</button>
+                    <button class="control-btn" onclick="zoomIn()">放大</button>
+                    <button class="control-btn" onclick="zoomOut()">缩小</button>
+                </div>
+                <div class="control-group">
+                    <button class="control-btn" onclick="updateLocation()">更新位置</button>
+                    <button class="control-btn" onclick="toggleTraffic()">路况</button>
+                </div>
+            </div>
+            
+            <!-- 地图容器 -->
+            <div id="map-container"></div>
+            
+            <div class="location-info">
+                <h3>📍 实位置信息</h3>
+                <p id="location-text">正在获取您的位置信息...</p>
+                <p id="accuracy-text">定位精度：等待中</p>
+            </div>
+        </section>
+        
+        <!-- 价格页面内容 -->
+        <section id="prices" class="animated">
+            <h1>💰 电池价格</h1>
+            <p class="subtitle">查看我们的电池产品及价格信息</p>
+            
+            <div class="price-container">
+                <div class="battery-card">
+                    <div class="battery-name">锂电池</div>
+                    <div class="battery-price">¥ 10000</div>
+                    <div class="battery-specs">
+                        <p>容量: 1Ah</p>
+                        <p>电压: 100v</p>
+                        <p>类型: 锂电池</p>
+                    </div>
+                </div>
+                
+                <div class="battery-card">
+                    <div class="battery-name"></div>
+                    <div class="battery-price">¥</div>
+                    <div class="battery-specs">
+                        <p>容量: </p>
+                        <p>电压: </p>
+                        <p>类型: </p>
+                    </div>
+                </div>
+                
+                <div class="battery-card">
+                    <div class="battery-name"></div>
+                    <div class="battery-price">¥ </div>
+                    <div class="battery-specs">
+                        <p>容量: </p>
+                        <p>电压: </p>
+                        <p>类型: </p>
+                    </div>
+                </div>
+                
+                <div class="battery-card">
+                    <div class="battery-name"></div>
+                    <div class="battery-price">¥ </div>
+                    <div class="battery-specs">
+                        <p>容量: </p>
+                        <p>电压: </p>
+                        <p>类型: </p>
+                    </div>
+                </div>
+                
+                <div class="battery-card">
+                    <div class="battery-name"></div>
+                    <div class="battery-price">¥ </div>
+                    <div class="battery-specs">
+                        <p>容量: </p>
+                        <p>电压: </p>
+                        <p>类型: </p>
+                    </div>
+                </div>
+                
+                <div class="battery-card">
+                    <div class="battery-name"></div>
+                    <div class="battery-price">¥ </div>
+                    <div class="battery-specs">
+                        <p>容量: </p>
+                        <p>电压: </p>
+                        <p>类型: </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 大成电池. 版权所有.</p>
+        <p>高德地图API提供地图技术支持</p>
+    </footer>
+
+    <!-- 引入高德地图JavaScript API -->
+    <script type="text/javascript" 
+            src="https://webapi.amap.com/maps?v=1.4.15&key=YOUR_API_KEY"></script>
+    
+    <script>
+        let map;
+        let marker;
+        let geolocation;
+        let trafficLayer;
+
+        // 初始化地图
+        function initMap() {
+            map = new AMap.Map('map-container', {
+                zoom: 11,
+                center: [116.397428, 39.90923],
+                mapStyle: 'amap://styles/normal',
+                pitch: 0, // 地图俯仰角度，有效范围 0-83
+                rotation: 0, // 地图旋转角度
+                viewMode: '3D' // 默认使用 2D 模式
+            });
+
+            // 添加地图控件
+            map.addControl(new AMap.Scale());
+            map.addControl(new AMap.ToolBar());
+            map.addControl(new AMap.MapType());
+            map.addControl(new AMap.HawkEye({isOpen: false}));
+
+            // 添加标记点
+            marker = new AMap.Marker({
+                position: [116.397428, 39.90923],
+                title: '当前位置',
+                icon: new AMap.Icon({
+                    size: new AMap.Size(40, 50),
+                    image: 'https://webapi.amap.com/theme/v1.3/markers/n/mark_bs.png',
+                    imageSize: new AMap.Size(40, 50)
+                })
+            });
+            map.add(marker);
+
+            // 初始化实时定位
+            initGeolocation();
+        }
+
+        // 初始化定位
+        function initGeolocation() {
+            AMap.plugin('AMap.Geolocation', function() {
+                geolocation = new AMap.Geolocation({
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
+                    convert: true,
+                    showButton: true,
+                    buttonPosition: 'RB',
+                    buttonOffset: new AMap.Pixel(10, 20),
+                    showMarker: true,
+                    showCircle: true,
+                    panToLocation: true,
+                    zoomToAccuracy: true
+                });
+                
+                geolocation.getCurrentPosition();
+                
+                AMap.event.addListener(geolocation, 'complete', function(data){
+                    updateLocationInfo(data);
+                });
+                
+                AMap.event.addListener(geolocation, 'error', function(err){
+                    document.getElementById('location-text').innerHTML = 
+                        '<span style="color: #e74c3c;">定位失败: ' + err.message + '</span>';
+                });
+            });
+        }
+
+        // 更新位置信息显示
+        function updateLocationInfo(data) {
+            const locationText = document.getElementById('location-text');
+            const accuracyText = document.getElementById('accuracy-text');
+            
+            if(data.position) {
+                const pos = data.position;
+                locationText.innerHTML = `当前位置: 经度 ${pos.lng.toFixed(6)}, 纬度 ${pos.lat.toFixed(6)}`;
+                accuracyText.innerHTML = `定位精度: ±${data.accuracy} 米`;
+                
+                // 更新标记位置
+                marker.setPosition([pos.lng, pos.lat]);
+                map.setCenter([pos.lng, pos.lat]);
+            }
+        }
+
+        // 地图操作函数
+        function centerMap() {
+            geolocation.getCurrentPosition();
+        }
+
+        function zoomIn() {
+            map.zoomIn();
+        }
+
+        function zoomOut() {
+            map.zoomOut();
+        }
+
+        function updateLocation() {
+            geolocation.getCurrentPosition();
+        }
+
+        function toggleTraffic() {
+            if (!trafficLayer) {
+                trafficLayer = new AMap.TileLayer.Traffic({
+                    zIndex: 10
+                });
+            }
+            
+            if (map.getLayers().includes(trafficLayer)) {
+                map.remove(trafficLayer);
+            } else {
+                map.add(trafficLayer);
+            }
+        }
+
+        // 页面加载完成后初始化地图
+        window.onload = function() {
+            // 在页面加载时默认显示首页
+            showSection('home');
+            setTimeout(initMap, 500); // 延迟加载以确保DOM完全渲染
+        };
+        
+        // 切换页面内容显示
+        function showSection(sectionId) {
+            // 隐藏所有内容区域
+            const sections = document.querySelectorAll('section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // 显示选中的内容区域
+            const targetSection = document.getElementById(sectionId);
+            targetSection.classList.add('active');
+            
+            // 强制确保目标section可见
+            targetSection.style.display = 'block';
+            
+            // 如果切换到首页且地图未初始化，则初始化地图
+            if(sectionId === 'home' && !map) {
+                setTimeout(initMap, 100);
+            }
+        }
+    </script>
+</body>
+</html>
